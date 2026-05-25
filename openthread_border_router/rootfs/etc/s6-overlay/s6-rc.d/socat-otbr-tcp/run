@@ -6,10 +6,12 @@
 # ==============================================================================
 
 declare network_device
+declare network_device_retry_interval
 
 network_device=$(bashio::config 'network_device')
+network_device_retry_interval=$(bashio::config 'network_device_retry_interval')
 
 bashio::log.info "Starting socat TCP client for OTBR daemon..."
 exec s6-notifyoncheck -d -s 300 -w 300 \
     "/usr/bin/socat" -d pty,raw,echo=0,link=/tmp/ttyOTBR,ignoreeof \
-    "tcp:${network_device}"
+    "tcp:${network_device},forever,interval=${network_device_retry_interval}"

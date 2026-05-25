@@ -28,6 +28,7 @@ options:
   device: null
   baudrate: "460800"
   flow_control: true
+  network_device_retry_interval: 300
   otbr_log_level: notice
   firewall: true
   nat64: false
@@ -44,6 +45,7 @@ schema:
   flow_control: bool
   backbone_interface: str?
   network_device: str?
+  network_device_retry_interval: int(0,)?
   otbr_log_level: list(debug|info|notice|warning|error|critical|alert|emergency)
   firewall: bool
   nat64: bool

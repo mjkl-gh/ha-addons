@@ -88,6 +88,9 @@ App configuration:
 
 > [!NOTE]
 > When using a network device, you still need to set a dummy serial port device, e.g. `/dev/ttyS3`.
+> Use `network_device_retry_interval` to control how many seconds `socat`
+> waits before retrying the network-based RCP connection. The default is 300
+> seconds (5 minutes).
 
 ## Support
 
