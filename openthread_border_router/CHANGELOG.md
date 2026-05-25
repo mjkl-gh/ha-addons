@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.16.9
+
+- Add configurable 5-minute default retry interval for serial-over-TCP `socat`
+- Publish custom OpenThread Border Router images to GHCR for this repository
+
 ## 2.16.8
 
 - Use regular hostname with "-otbr" suffix in beta mode to make OTBR recognizable

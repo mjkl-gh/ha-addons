@@ -1,10 +1,10 @@
-ARG BUILD_FROM
+ARG BUILD_ARCH=amd64
 
 # OTBR builder stage (beta)
-FROM ${BUILD_FROM} AS otbr-beta-builder
+FROM ghcr.io/home-assistant/${BUILD_ARCH}-base-debian:trixie AS otbr-beta-builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ARG OTBR_BETA_VERSION
+ARG OTBR_BETA_VERSION=624a7d98e0dac5984c2982068f71fc81d2dbceb5
 
 ENV BORDER_ROUTING=1
 ENV BACKBONE_ROUTER=1
@@ -38,40 +38,40 @@ RUN \
     set -x \
     && mv /usr/src/openthread-core-ha-config-posix.h /usr/src/ot-br-posix/third_party/openthread/repo/ \
     && ./script/cmake-build \
-        -DBUILD_TESTING=OFF \
-        -DCMAKE_INSTALL_PREFIX=/opt/otbr-beta \
-        -DOTBR_FEATURE_FLAGS=ON \
-        -DOTBR_MDNS=openthread \
-        -DOTBR_VERSION= \
-        -DOT_PACKAGE_VERSION= \
-        -DOTBR_DBUS=OFF \
-        -DOT_POSIX_RCP_HDLC_BUS=ON \
-        -DOTBR_VENDOR_NAME="Home Assistant" \
-        -DOTBR_PRODUCT_NAME="OpenThread Border Router" \
-        # The Meshcop service name is specified in `openthread-core-ha-config-posix.h`
-        -DOTBR_WEB=ON \
-        -DOTBR_BORDER_ROUTING=ON \
-        -DOTBR_REST=ON \
-        -DOTBR_BACKBONE_ROUTER=ON \
-        -DOTBR_TREL=ON \
-        -DOTBR_NAT64=ON \
-        -DOT_POSIX_NAT64_CIDR="192.168.255.0/24" \
-        -DOTBR_DNS_UPSTREAM_QUERY=ON \
-        -DOT_CHANNEL_MONITOR=ON \
-        -DOT_COAP=OFF \
-        -DOT_COAPS=OFF \
-        -DOT_THREAD_VERSION=1.4 \
-        -DOT_PROJECT_CONFIG="/usr/src/ot-br-posix/third_party/openthread/repo/openthread-core-ha-config-posix.h" \
-        -DOT_RCP_RESTORATION_MAX_COUNT=2 \
+    -DBUILD_TESTING=OFF \
+    -DCMAKE_INSTALL_PREFIX=/opt/otbr-beta \
+    -DOTBR_FEATURE_FLAGS=ON \
+    -DOTBR_MDNS=openthread \
+    -DOTBR_VERSION= \
+    -DOT_PACKAGE_VERSION= \
+    -DOTBR_DBUS=OFF \
+    -DOT_POSIX_RCP_HDLC_BUS=ON \
+    -DOTBR_VENDOR_NAME="Home Assistant" \
+    -DOTBR_PRODUCT_NAME="OpenThread Border Router" \
+    # The Meshcop service name is specified in `openthread-core-ha-config-posix.h`
+    -DOTBR_WEB=ON \
+    -DOTBR_BORDER_ROUTING=ON \
+    -DOTBR_REST=ON \
+    -DOTBR_BACKBONE_ROUTER=ON \
+    -DOTBR_TREL=ON \
+    -DOTBR_NAT64=ON \
+    -DOT_POSIX_NAT64_CIDR="192.168.255.0/24" \
+    -DOTBR_DNS_UPSTREAM_QUERY=ON \
+    -DOT_CHANNEL_MONITOR=ON \
+    -DOT_COAP=OFF \
+    -DOT_COAPS=OFF \
+    -DOT_THREAD_VERSION=1.4 \
+    -DOT_PROJECT_CONFIG="/usr/src/ot-br-posix/third_party/openthread/repo/openthread-core-ha-config-posix.h" \
+    -DOT_RCP_RESTORATION_MAX_COUNT=2 \
     && cd /usr/src/ot-br-posix/build/otbr \
     && ninja install
 
 
 # OTBR builder stage (stable)
-FROM ${BUILD_FROM} AS otbr-stable-builder
+FROM ghcr.io/home-assistant/${BUILD_ARCH}-base-debian:trixie AS otbr-stable-builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ARG OTBR_VERSION
+ARG OTBR_VERSION=b067e5ac5f8b3e92750df24922017eee2bc0fa04
 
 ENV BORDER_ROUTING=1
 ENV BACKBONE_ROUTER=1
@@ -108,69 +108,69 @@ RUN \
     set -x \
     && mv /usr/src/openthread-core-ha-config-posix.h /usr/src/ot-br-posix/third_party/openthread/repo/ \
     && ( \
-        cd third_party/openthread/repo \
-        && patch -p1 < /usr/src/0001-channel-monitor-disable-by-default.patch \
-        && patch -p1 < /usr/src/0002-spinel-Clear-source-match-tables-before-restoring.patch \
+    cd third_party/openthread/repo \
+    && patch -p1 < /usr/src/0001-channel-monitor-disable-by-default.patch \
+    && patch -p1 < /usr/src/0002-spinel-Clear-source-match-tables-before-restoring.patch \
     ) \
     && ./script/cmake-build \
-        -DBUILD_TESTING=OFF \
-        -DCMAKE_INSTALL_PREFIX=/opt/otbr-stable \
-        -DOTBR_FEATURE_FLAGS=ON \
-        -DOTBR_DNSSD_DISCOVERY_PROXY=ON \
-        -DOTBR_SRP_ADVERTISING_PROXY=ON \
-        -DOTBR_MDNS=mDNSResponder \
-        -DOTBR_VERSION= \
-        -DOT_PACKAGE_VERSION= \
-        -DOTBR_DBUS=OFF \
-        -DOT_POSIX_RCP_BUS_UART=ON \
-        -DOT_LINK_RAW=1 \
-        -DOTBR_VENDOR_NAME="Home Assistant" \
-        -DOTBR_PRODUCT_NAME="OpenThread Border Router" \
-        -DOTBR_WEB=ON \
-        -DOTBR_BORDER_ROUTING=ON \
-        -DOTBR_REST=ON \
-        -DOTBR_BACKBONE_ROUTER=ON \
-        -DOTBR_TREL=ON \
-        -DOTBR_NAT64=ON \
-        -DOT_POSIX_NAT64_CIDR="192.168.255.0/24" \
-        -DOTBR_DNS_UPSTREAM_QUERY=ON \
-        -DOT_CHANNEL_MONITOR=ON \
-        -DOT_COAP=OFF \
-        -DOT_COAPS=OFF \
-        -DOT_DNS_CLIENT_OVER_TCP=OFF \
-        -DOT_THREAD_VERSION=1.3 \
-        -DOT_PROJECT_CONFIG="/usr/src/ot-br-posix/third_party/openthread/repo/openthread-core-ha-config-posix.h" \
-        -DOT_RCP_RESTORATION_MAX_COUNT=2 \
+    -DBUILD_TESTING=OFF \
+    -DCMAKE_INSTALL_PREFIX=/opt/otbr-stable \
+    -DOTBR_FEATURE_FLAGS=ON \
+    -DOTBR_DNSSD_DISCOVERY_PROXY=ON \
+    -DOTBR_SRP_ADVERTISING_PROXY=ON \
+    -DOTBR_MDNS=mDNSResponder \
+    -DOTBR_VERSION= \
+    -DOT_PACKAGE_VERSION= \
+    -DOTBR_DBUS=OFF \
+    -DOT_POSIX_RCP_BUS_UART=ON \
+    -DOT_LINK_RAW=1 \
+    -DOTBR_VENDOR_NAME="Home Assistant" \
+    -DOTBR_PRODUCT_NAME="OpenThread Border Router" \
+    -DOTBR_WEB=ON \
+    -DOTBR_BORDER_ROUTING=ON \
+    -DOTBR_REST=ON \
+    -DOTBR_BACKBONE_ROUTER=ON \
+    -DOTBR_TREL=ON \
+    -DOTBR_NAT64=ON \
+    -DOT_POSIX_NAT64_CIDR="192.168.255.0/24" \
+    -DOTBR_DNS_UPSTREAM_QUERY=ON \
+    -DOT_CHANNEL_MONITOR=ON \
+    -DOT_COAP=OFF \
+    -DOT_COAPS=OFF \
+    -DOT_DNS_CLIENT_OVER_TCP=OFF \
+    -DOT_THREAD_VERSION=1.3 \
+    -DOT_PROJECT_CONFIG="/usr/src/ot-br-posix/third_party/openthread/repo/openthread-core-ha-config-posix.h" \
+    -DOT_RCP_RESTORATION_MAX_COUNT=2 \
     && cd /usr/src/ot-br-posix/build/otbr \
     && ninja install
 
 # Runtime image
-FROM ${BUILD_FROM}
+FROM ghcr.io/home-assistant/${BUILD_ARCH}-base-debian:trixie
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ARG SERIALX_VERSION
-ARG UNIVERSAL_SILABS_FLASHER_VERSION
+ARG SERIALX_VERSION=0.5.0
+ARG UNIVERSAL_SILABS_FLASHER_VERSION=0.1.2
 
 # Install runtime dependencies
 RUN \
     set -x \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
-       python3 \
-       python3-pip \
-       netcat-openbsd \
-       socat \
-       iproute2 \
-       iputils-ping \
-       ipset \
-       iptables \
-       libreadline8 \
-       libncurses6 \
-       libprotobuf-lite32 \
-       libjsoncpp26 \
+    python3 \
+    python3-pip \
+    netcat-openbsd \
+    socat \
+    iproute2 \
+    iputils-ping \
+    ipset \
+    iptables \
+    libreadline8 \
+    libncurses6 \
+    libprotobuf-lite32 \
+    libjsoncpp26 \
     && pip install --break-system-packages --no-cache-dir \
-       universal-silabs-flasher==${UNIVERSAL_SILABS_FLASHER_VERSION} \
-       serialx==${SERIALX_VERSION} \
+    universal-silabs-flasher==${UNIVERSAL_SILABS_FLASHER_VERSION} \
+    serialx==${SERIALX_VERSION} \
     && rm -rf /var/lib/apt/lists/*
 
 # Setup routing table for OpenThread
