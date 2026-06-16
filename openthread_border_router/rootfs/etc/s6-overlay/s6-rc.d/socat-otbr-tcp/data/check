@@ -1,10 +1,4 @@
 #!/bin/sh
 
-# Allow socat time to establish connection or retry
-# Just verify the socat process is running, not that the device exists yet
-# Device may not exist during network connection attempts
-if ps aux | grep -q "[s]ocat.*ttyOTBR"; then
-    exit 0
-else
-    exit 1
-fi
+test -c /tmp/ttyOTBR
+exit
