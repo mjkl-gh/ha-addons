@@ -157,12 +157,16 @@ echo "${otbr_rest_listen}" > /tmp/otbr-agent-rest-api
 echo "${otbr_rest_listen_port}" >> /tmp/otbr-agent-rest-api
 
 # Migrate OTBR settings to new adapter if needed
+# Migration is best-effort: the radio may be temporarily unresponsive after a
+# crash/reconnect, so a timeout here must not abort the startup sequence.
 bashio::log.info "Migrating OTBR settings if needed..."
-python3 /usr/local/bin/migrate_otbr_settings.py \
+if ! python3 /usr/local/bin/migrate_otbr_settings.py \
     --adapter "${device}" \
     --baudrate "${baudrate}" \
     --flow-control "${migrate_flow_control}" \
-    --data-dir /data/thread/
+    --data-dir /data/thread/; then
+    bashio::log.warning "OTBR settings migration failed (radio may not be ready yet), continuing anyway."
+fi
 
 bashio::log.info "Starting otbr-agent..."
 # shellcheck disable=SC2086
